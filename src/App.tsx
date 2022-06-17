@@ -1,10 +1,11 @@
-function App() {
+import Board from "./components/Board";
 
+function App() {
   return (
-    <div className="App">
-      Sudoku
+    <div className="container mx-auto">
+      <Board />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
