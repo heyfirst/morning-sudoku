@@ -2,13 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-.item-block {
+.block {
     @apply w-10 md:w-14 lg:w-16 h-10 md:h-14 lg:h-16 
-    border-t border-l group-last:border-b last:border-r border-gray-400
-    [&:nth-child(3n):not(:last-child)]:border-r-gray-900 [&:nth-child(3n)]:border-r
-    flex items-center justify-center
+      border-t border-l group-last:border-b last:border-r border-gray-400
+      [&:nth-child(3n):not(:last-child)]:border-r-gray-900 [&:nth-child(3n)]:border-r
+      flex items-center justify-center
 }
 
-.group:nth-child(3n):not(:last-child) .item-block {
+.group:nth-child(3n):not(:last-child) .block {
     @apply border-b-gray-900 border-b
 }
+
