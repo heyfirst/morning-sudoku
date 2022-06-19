@@ -50,6 +50,7 @@ class Sudoku {
     return board;
   };
 
+  // TODO: support failure solve case
   solveSudoku = (board: string[][]) => {
     this.board = board;
     this.doSolve(this.board, 0, 0);
