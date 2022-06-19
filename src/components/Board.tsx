@@ -1,19 +1,54 @@
 import React from "react";
 
-const DEFAULT_BOARD = [
-  ["", "", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", "", ""],
-  ["", "", "", "", "", "", "", "", ""],
-];
+const DEFAULT_BOARD = Array(9)
+  .fill([])
+  .map(() => Array(9).fill(""));
 
+// TODO: move to worker
 class Sudoku {
   board: string[][] | undefined;
+
+  generate = (): string[][] => {
+    const solvedBoard = this.generateSolvedBoard();
+    const board = this.emptyBlocks(solvedBoard, 81 - 32);
+    return board;
+  };
+
+  // TODO: rewrite with better solution such as rotate, suffuring, playing with matrix
+  generateSolvedBoard = (): string[][] => {
+    const randomBoard = JSON.parse(JSON.stringify(DEFAULT_BOARD));
+
+    [1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => {
+      const row = Math.floor(Math.random() * 9);
+      const col = Math.floor(Math.random() * 9);
+      randomBoard[row][col] = num.toString();
+    });
+
+    const board = this.solveSudoku(randomBoard);
+    return board;
+  };
+
+  // TODO: refactor to functional way
+  emptyBlocks = (solvedBoard: string[][], hideBlock: number) => {
+    const board: string[][] = JSON.parse(JSON.stringify(solvedBoard));
+
+    const countEmptyCoordinate = () =>
+      board.reduce((count, row) => count + row.filter(Boolean).length, 0);
+
+    const getEmptyCoordinate = (): { row: number; col: number } => {
+      const row = Math.floor(Math.random() * 9);
+      const col = Math.floor(Math.random() * 9);
+
+      return board[row][col] ? { row, col } : getEmptyCoordinate();
+    };
+
+    do {
+      const { row, col } = getEmptyCoordinate();
+      board[row][col] = "";
+    } while (9 * 9 - hideBlock < countEmptyCoordinate());
+
+    return board;
+  };
 
   solveSudoku = (board: string[][]) => {
     this.board = board;
@@ -22,6 +57,7 @@ class Sudoku {
     return this.board;
   };
 
+  // TODO: refactor to functional way
   doSolve(board: string[][], row: number, col: number) {
     for (let i = row; i < 9; i++, col = 0) {
       for (let j = col; j < 9; j++) {
@@ -48,11 +84,11 @@ class Sudoku {
       const columnExist = board[i][col] == num;
       const rowExist = board[row][i] == num;
 
-      const zoneRow = block_row + Math.floor(i / 3);
-      const zoneCol = block_col + (i % 3);
-      const zoneExist = board[zoneRow][zoneCol] == num;
+      const boxRow = block_row + Math.floor(i / 3);
+      const boxCol = block_col + (i % 3);
+      const boxExist = board[boxRow][boxCol] == num;
 
-      if (columnExist || rowExist || zoneExist) return false;
+      if (columnExist || rowExist || boxExist) return false;
     }
 
     return true;
@@ -62,13 +98,15 @@ class Sudoku {
 const sudoku = new Sudoku();
 
 const Board = () => {
-  const [board, setBoard] = React.useState<string[][]>(DEFAULT_BOARD);
+  // TODO: freeze block when generate, allow only empty block
+  const [board, setBoard] = React.useState<string[][]>(sudoku.generate());
 
   const onSolve = () => {
     const solvedBoard = sudoku.solveSudoku(board);
     setBoard(JSON.parse(JSON.stringify(solvedBoard)));
   };
 
+  // TODO: real-time validate
   const setBlock =
     (row: number, col: number) =>
     ({ target: { value } }: any) => {
